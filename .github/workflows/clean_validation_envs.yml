@@ -1,0 +1,41 @@
+---
+name: Clean Validation Environments
+
+on:  # yamllint disable-line rule:truthy
+  schedule:
+    # Every 2 hours
+    - cron: "0 */1 * * *"
+  workflow_dispatch:
+
+jobs:
+  clean:
+    name: Clean
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: Dev
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # This is CRITICAL since we're making decisions based on branch existence
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          environment: ${{ (secrets.AZURE_ENVIRONMENT != '' && secrets.AZURE_ENVIRONMENT) || 'AzureCloud' }}
+
+      - name: Run clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAIN_TRE_ID: ${{ secrets.TRE_ID }}
+          GITHUB_REPOSITORY: ${{ github.repository}}
+          BRANCH_LAST_ACTIVITY_IN_HOURS_FOR_STOP: 4
+          BRANCH_LAST_ACTIVITY_IN_HOURS_FOR_DESTROY: 48
+        run: .github/scripts/clean_ci_validation_envs.sh
