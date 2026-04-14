@@ -100,7 +100,7 @@ ARG AZURE_CLI_VERSION=2.81.0-1~bookworm
 COPY .devcontainer/scripts/azure-cli.sh /tmp/
 RUN export AZURE_CLI_VERSION=${AZURE_CLI_VERSION} \
     && /tmp/azure-cli.sh
-ENV AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1  # quick but less secure
+ENV AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 
 RUN cat /usr/local/share/ca-certificates/uzb_root_ca.crt >> /opt/az/lib/python3.13/site-packages/certifi/cacert.pem
 
