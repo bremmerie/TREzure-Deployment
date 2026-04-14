@@ -17,8 +17,8 @@
       // 		export DOCKER_GROUP_ID=$(getent group docker | awk -F ":" '{ print $3 }')
       "DOCKER_GROUP_ID": "${localEnv:DOCKER_GROUP_ID}",
       "INTERACTIVE": "true",
-      "UPSTREAM_REPO": "microsoft/AzureTRE",
-      "UPSTREAM_REPO_VERSION": "v0.28.0",
+      "UPSTREAM_REPO": "bremmerie/TREzure",
+      //"UPSTREAM_REPO_VERSION": "v0.28.0",
       "GITHUB_TOKEN": ""
     }
   },

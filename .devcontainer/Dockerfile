@@ -16,12 +16,39 @@ RUN usermod --uid $USER_UID $USERNAME
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Add UZB Root CA cert
+RUN apt-get update && apt-get install -y curl gnupg ca-certificates lsb-release
+COPY .devcontainer/uzb_root_ca.crt /usr/local/share/ca-certificates/uzb_root_ca.crt
+RUN update-ca-certificates
+
+#ENV REQUESTS_CA_BUNDLE="/usr/local/share/ca-certificates/uzb_root_ca.crt"
+
 # Set env for tracking that we're running in a devcontainer
 ENV DEVCONTAINER=true
 
 # Install Node.js for GH actions tests and UI
+#ARG NODE_VERSION="lts/*"
+#ARG NODE_VERSION="lts/*"
+# RUN <<EOF
+# su $USERNAME -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
+# && export NVM_DIR=\"\$HOME/.nvm\" \
+# && [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\" \
+# && nvm install ${NODE_VERSION} 2>&1"
+# EOF
+#RUN which node
+#RUN su $USERNAME -c "export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion""
+#RUN nvm install 22
+#RUN su $USERNAME -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"
+# Find latest nodejs version: nvm ls-remote
+#RUN su $USERNAME -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install 22 2>&1"
+#RUN su $USERNAME -c "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash"
+#RUN su $USERNAME -c "/usr/local/share/nvm/nvm.sh && nvm install 22"
+# Install Node.js for GH actions tests and UI
 ARG NODE_VERSION="lts/*"
 RUN su $USERNAME -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"
+RUN node -v
+RUN npm config set cafile /usr/local/share/ca-certificates/uzb_root_ca.crt
+
 
 # Install terraform
 ARG TERRAFORM_VERSION="1.14.3"
@@ -73,6 +100,9 @@ ARG AZURE_CLI_VERSION=2.81.0-1~bookworm
 COPY .devcontainer/scripts/azure-cli.sh /tmp/
 RUN export AZURE_CLI_VERSION=${AZURE_CLI_VERSION} \
     && /tmp/azure-cli.sh
+ENV AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1  # quick but less secure
+
+RUN cat /usr/local/share/ca-certificates/uzb_root_ca.crt >> /opt/az/lib/python3.13/site-packages/certifi/cacert.pem
 
 ARG YQ_VERSION="v4.49.2"
 RUN curl -L --fail -o /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \

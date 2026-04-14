@@ -4,7 +4,7 @@ SHELL:=/bin/bash
 AZURETRE_HOME?="AzureTRE"
 
 # This must come before the include statement
-# Otherwise, $(lastword) will be the last included file
+# Otherwise, $(lastword) will be the last included filemake
 THIS_MAKEFILE_FULLPATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 THIS_MAKEFILE_DIR := $(dir $(THIS_MAKEFILE_FULLPATH))
 
