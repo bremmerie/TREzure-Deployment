@@ -48,6 +48,7 @@ ARG NODE_VERSION="lts/*"
 RUN su $USERNAME -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"
 RUN node -v
 RUN npm config set cafile /usr/local/share/ca-certificates/uzb_root_ca.crt
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/uzb_root_ca.crt
 
 
 # Install terraform
@@ -69,7 +70,9 @@ RUN apt-get update && apt-get install -y ca-certificates curl gnupg lsb-release 
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
     | tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update && apt-get install -y docker-ce="$DOCKER_CE_VERSION" docker-ce-cli="$DOCKER_CE_CLI_VERSION" docker-compose-plugin="$DOCKER_COMPOSE_PLUGIN_VERSION" containerd.io="$DOCKER_CONTAINERD_VERSION" docker-buildx-plugin --no-install-recommends \
-    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /etc/docker/certs.d/acruzbtrezurecoreuat.azurecr.io \
+    && cp /usr/local/share/ca-certificates/uzb_root_ca.crt /etc/docker/certs.d/acruzbtrezurecoreuat.azurecr.io/ca.crt
 
 # Install Certbot
 RUN if [ "${INTERACTIVE}" = "true" ]; then \
@@ -103,6 +106,7 @@ RUN export AZURE_CLI_VERSION=${AZURE_CLI_VERSION} \
 ENV AZURE_CLI_DISABLE_CONNECTION_VERIFICATION=1
 
 RUN cat /usr/local/share/ca-certificates/uzb_root_ca.crt >> /opt/az/lib/python3.13/site-packages/certifi/cacert.pem
+COPY .devcontainer/sitecustomize.py /opt/az/lib/python3.13/site-packages/sitecustomize.py
 
 ARG YQ_VERSION="v4.49.2"
 RUN curl -L --fail -o /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64" \

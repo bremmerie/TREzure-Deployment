@@ -424,3 +424,5 @@ letsencrypt/
 .devcontainer/uzb_root_ca.crt
 config.example.yaml
 config.sample.yaml
+
+.claude-backup/**
