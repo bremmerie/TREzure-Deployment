@@ -87,20 +87,18 @@ for tmpl in templates:
 print(f"Porter Dockerfile.tmpl: {patched} patched, {already} already patched")
 PYEOF
 
-# 4. (One-time fix, NOT for fresh installs) Copy Terraform import blocks for pre-existing
-#    Azure resources that are missing from state. imports.tf contains hardcoded resource IDs
-#    specific to this deployment — enabling this on a fresh install will break terraform plan
-#    because it tries to import resources that don't exist yet.
-#
-# python3 - << 'PYEOF'
-# import os, shutil
-# azuretre_home = os.environ.get("AZURETRE_HOME", os.path.expanduser("~/AzureTRE"))
-# devcontainer_dir = "/workspaces/TREzure-Deployment/.devcontainer"
-# src = os.path.join(devcontainer_dir, "imports.tf")
-# dst = os.path.join(azuretre_home, "core/terraform/imports.tf")
-# if os.path.exists(src):
-#     shutil.copy(src, dst)
-#     print(f"Copied imports.tf to {dst}")
-# else:
-#     print(f"No imports.tf found at {src}, skipping")
-# PYEOF
+# 4. Copy Terraform import blocks for pre-existing Azure resources that are missing from state.
+#    imports.tf contains hardcoded resource IDs specific to this deployment.
+#    On a fresh deployment where resources don't exist yet, keep imports.tf empty to avoid errors.
+python3 - << 'PYEOF'
+import os, shutil
+azuretre_home = os.environ.get("AZURETRE_HOME", os.path.expanduser("~/AzureTRE"))
+devcontainer_dir = "/workspaces/TREzure-Deployment/.devcontainer"
+src = os.path.join(devcontainer_dir, "imports.tf")
+dst = os.path.join(azuretre_home, "core/terraform/imports.tf")
+if os.path.exists(src):
+    shutil.copy(src, dst)
+    print(f"Copied imports.tf to {dst}")
+else:
+    print(f"No imports.tf found at {src}, skipping")
+PYEOF
