@@ -80,6 +80,7 @@ RUN if [ "${INTERACTIVE}" = "true" ]; then \
     && python3 -m venv /opt/certbot/ \
     && /opt/certbot/bin/pip install --no-cache-dir --upgrade pip \
     && /opt/certbot/bin/pip install --no-cache-dir certbot \
+    && cat /usr/local/share/ca-certificates/uzb_root_ca.crt >> /opt/certbot/lib/python3.12/site-packages/certifi/cacert.pem \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/* ; fi
 
 # Install Porter, updates should be propagated to the RP.
